@@ -3,9 +3,6 @@ apply plugin: 'com.github.dcendents.android-maven'
 group = 'com.github.panos-stavrianos'
 android {
     compileSdkVersion 28
-
-
-
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 28
