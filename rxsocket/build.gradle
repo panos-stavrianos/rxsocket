@@ -1,0 +1,37 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    def support_version = "28.0.0-alpha3"
+
+    implementation "com.android.support:appcompat-v7:$support_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.8'
+    implementation 'io.github.microutils:kotlin-logging:1.5.4'
+    implementation group: 'org.slf4j', name: 'slf4j-android', version: '1.7.21'
+    implementation 'commons-codec:commons-codec:20041127.091804'
+}
