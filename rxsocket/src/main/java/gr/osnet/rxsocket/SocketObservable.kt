@@ -138,8 +138,9 @@ class SocketObservable(val mConfig: SocketConfig, val mSocket: Socket, val mClie
                 val messageCRC = CRC16Hex.getCheck(message)
                 return if (resultString.endsWith(messageCRC))
                     message.toByteArray()
-                else
+                else {
                     ByteArray(0)
+                }
             }
         }
         return data

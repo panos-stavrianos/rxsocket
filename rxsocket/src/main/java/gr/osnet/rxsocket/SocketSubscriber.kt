@@ -37,7 +37,7 @@ abstract class SocketSubscriber : Consumer<DataWrapper> {
                 val data = if (t.pre_shared_key != null)
                     AES.unpack(String(t.data).substring(4), t.pre_shared_key)
                 else
-                    String(t.data)
+                    String(t.data, Charsets.UTF_8)
                 logger.info { "From server: $data" }
                 onResponse(data)
             }
