@@ -2,11 +2,10 @@ package gr.osnet.rxsocket
 
 import android.util.Base64
 import mu.KotlinLogging
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.UnsupportedEncodingException
-import java.nio.charset.StandardCharsets
+import java.nio.charset.Charset
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
@@ -18,6 +17,7 @@ import javax.crypto.*
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
+import kotlin.text.Charsets.UTF_8
 
 
 /**
@@ -45,7 +45,7 @@ object AES {
         logger.info { "message: " + data.length }
         val compressed = compress(data)
         logger.info { "compressed: " + compressed.size }
-        logger.info { "compressed: " + String(compressed, StandardCharsets.UTF_8) }
+        logger.info { "compressed: " + String(compressed, Charset.forName("utf-8")) }
 
         data = decompress(compressed)
         logger.info { "decompressed: " + data.length }
@@ -157,6 +157,17 @@ object AES {
         return ByteArray(0)
     }
 
+    fun compress(content: ByteArray): ByteArray {
+
+        val bos = ByteArrayOutputStream()
+        GZIPOutputStream(bos).bufferedWriter(UTF_8).use { it.write(String(content)) }
+        return bos.toByteArray()
+    }
+
+    fun decompress(content: ByteArray): String =
+            GZIPInputStream(content.inputStream()).bufferedReader(UTF_8).use { it.readText() }
+
+/*
     fun compress(data: ByteArray): ByteArray {
         try {
             val os = ByteArrayOutputStream(data.size)
@@ -174,9 +185,9 @@ object AES {
         return ByteArray(0)
     }
 
-    fun decompress(compressed: ByteArray): String {
+    fun decompress2(compressed: ByteArray): String {
         try {
-            val BUFFER_SIZE = 32
+            val BUFFER_SIZE = 2
             val `is` = ByteArrayInputStream(compressed)
             val gis: GZIPInputStream?
             gis = GZIPInputStream(`is`, BUFFER_SIZE)
@@ -188,7 +199,7 @@ object AES {
                 bytesRead = gis.read(data)
                 if ((bytesRead) == -1)
                     break
-                string.append(String(data, 0, bytesRead))
+                string.append(String(data, 0, bytesRead, Charset.forName("utf-8")))
             }
             gis.close()
             `is`.close()
@@ -200,6 +211,25 @@ object AES {
         return "ERROR"
     }
 
+    fun decompress(compressed: ByteArray): String {
+        val BUFFER_SIZE = 16
+
+        val `is` = ByteArrayInputStream(compressed)
+        val gis = GZIPInputStream(`is`, BUFFER_SIZE)
+        val data = ByteArray(BUFFER_SIZE)
+        var bytesRead: Int
+        val baos = ByteArrayOutputStream()
+
+        bytesRead = gis.read(data)
+        while (bytesRead != -1) {
+            baos.write(data, 0, bytesRead)
+            bytesRead = gis.read(data)
+        }
+        gis.close()
+        `is`.close()
+        return baos.toString("UTF-8")
+    }
+*/
 
     fun pack(data: String, pre_shared_key: String?): String {
         val compressed = compress(data)

@@ -71,6 +71,7 @@ class SocketObservable(val mConfig: SocketConfig, val mSocket: Socket, val mClie
     }
 
     fun close() {
+
         observerWrapper.onNext(DataWrapper(state, ByteArray(0), mOption?.mPreSharedKey))
         observerWrapper.dispose()
     }
