@@ -55,7 +55,7 @@ class SocketClient(private val mConfig: SocketConfig) {
     private fun initHeartBeat() {
         mOption?.apply {
             if (mHeartBeatConfig != null) {
-                val disposable = Observable.interval(mHeartBeatConfig.interval, TimeUnit.MILLISECONDS)
+                val disposable = Observable.interval(mHeartBeatConfig.interval / 2, TimeUnit.MILLISECONDS)
                         .subscribe {
                             when {
                                 shouldSendHeartBeat() -> sendData(mHeartBeatConfig.data

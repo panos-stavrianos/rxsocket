@@ -167,70 +167,6 @@ object AES {
     fun decompress(content: ByteArray): String =
             GZIPInputStream(content.inputStream()).bufferedReader(UTF_8).use { it.readText() }
 
-/*
-    fun compress(data: ByteArray): ByteArray {
-        try {
-            val os = ByteArrayOutputStream(data.size)
-            val gos: GZIPOutputStream?
-            gos = GZIPOutputStream(os)
-            gos.write(data)
-            gos.close()
-            val compressed = os.toByteArray()
-            os.close()
-            return compressed
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        return ByteArray(0)
-    }
-
-    fun decompress2(compressed: ByteArray): String {
-        try {
-            val BUFFER_SIZE = 2
-            val `is` = ByteArrayInputStream(compressed)
-            val gis: GZIPInputStream?
-            gis = GZIPInputStream(`is`, BUFFER_SIZE)
-
-            val string = StringBuilder()
-            val data = ByteArray(BUFFER_SIZE)
-            var bytesRead: Int
-            while (true) {
-                bytesRead = gis.read(data)
-                if ((bytesRead) == -1)
-                    break
-                string.append(String(data, 0, bytesRead, Charset.forName("utf-8")))
-            }
-            gis.close()
-            `is`.close()
-            return string.toString()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        return "ERROR"
-    }
-
-    fun decompress(compressed: ByteArray): String {
-        val BUFFER_SIZE = 16
-
-        val `is` = ByteArrayInputStream(compressed)
-        val gis = GZIPInputStream(`is`, BUFFER_SIZE)
-        val data = ByteArray(BUFFER_SIZE)
-        var bytesRead: Int
-        val baos = ByteArrayOutputStream()
-
-        bytesRead = gis.read(data)
-        while (bytesRead != -1) {
-            baos.write(data, 0, bytesRead)
-            bytesRead = gis.read(data)
-        }
-        gis.close()
-        `is`.close()
-        return baos.toString("UTF-8")
-    }
-*/
-
     fun pack(data: String, pre_shared_key: String?): String {
         val compressed = compress(data)
         val encrypted = if (pre_shared_key != null)
@@ -242,11 +178,10 @@ object AES {
 
     fun pack(data: ByteArray, pre_shared_key: String?): ByteArray {
         val compressed = compress(data)
-        val encrypted = if (pre_shared_key != null)
+        return if (pre_shared_key != null)
             encrypt(compressed, pre_shared_key)
         else
             compressed
-        return encrypted
     }
 
     fun unpack(data: String, pre_shared_key: String?): String {
