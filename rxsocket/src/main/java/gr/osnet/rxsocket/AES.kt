@@ -64,7 +64,7 @@ object AES {
     }
 
     fun encrypt(plaintext: ByteArray, password: String): ByteArray {
-
+        if (password.isEmpty()) return ByteArray(0)
         val random = SecureRandom()
         val salt = ByteArray(16)
         random.nextBytes(salt)
@@ -94,10 +94,10 @@ object AES {
         return finalCipherText
 
 
-        //  return ByteArray(0)
     }
 
     fun decrypt(data: ByteArray, pre_shared_key: String): ByteArray {
+        if (pre_shared_key.isEmpty()) return ByteArray(0)
 
         try {
             val ivBytes = ByteArray(16)
@@ -168,6 +168,8 @@ object AES {
             GZIPInputStream(content.inputStream()).bufferedReader(UTF_8).use { it.readText() }
 
     fun pack(data: String, pre_shared_key: String?): String {
+        if (pre_shared_key.isNullOrEmpty()) return ""
+
         val compressed = compress(data)
         val encrypted = if (pre_shared_key != null)
             encrypt(compressed, pre_shared_key)
@@ -177,6 +179,8 @@ object AES {
     }
 
     fun pack(data: ByteArray, pre_shared_key: String?): ByteArray {
+        if (pre_shared_key.isNullOrEmpty()) return ByteArray(0)
+
         val compressed = compress(data)
         return if (pre_shared_key != null)
             encrypt(compressed, pre_shared_key)
@@ -185,6 +189,8 @@ object AES {
     }
 
     fun unpack(data: String, pre_shared_key: String?): String {
+        if (pre_shared_key.isNullOrEmpty()) return ""
+
         val enc = fromBase64(data)
         val compressed = if (pre_shared_key != null)
             decrypt(enc, pre_shared_key)
