@@ -21,12 +21,6 @@ import gr.osnet.rxsocket.meta.SocketState
 import io.reactivex.functions.Consumer
 import mu.KotlinLogging
 
-
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/9
- * @description:
- */
 private val logger = KotlinLogging.logger {}
 
 abstract class SocketSubscriber : Consumer<DataWrapper> {

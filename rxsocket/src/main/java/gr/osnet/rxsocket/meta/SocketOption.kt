@@ -16,13 +16,6 @@
 
 package gr.osnet.rxsocket.meta
 
-
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/8
- * @description:
- */
-
 class SocketOption(
         val mHeartBeatConfig: HeartBeatConfig?,
         val mHead: Byte?,

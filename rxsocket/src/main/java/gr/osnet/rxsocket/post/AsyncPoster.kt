@@ -20,12 +20,6 @@ import gr.osnet.rxsocket.SocketClient
 import mu.KotlinLogging
 import java.util.concurrent.Executor
 
-
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/9
- * @description:
- */
 private val logger = KotlinLogging.logger {}
 
 class AsyncPoster(private val mSocketClient: SocketClient, private val mExecutor: Executor) : Runnable, IPoster {

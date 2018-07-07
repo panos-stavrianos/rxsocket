@@ -16,11 +16,6 @@
 
 package gr.osnet.rxsocket.meta
 
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/8
- * @description:
- */
 object SocketState {
 
     const val OPEN = 0x00

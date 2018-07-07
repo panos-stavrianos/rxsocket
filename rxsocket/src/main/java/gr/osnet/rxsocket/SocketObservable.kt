@@ -26,12 +26,6 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.*
 
-
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/9
- * @description:
- */
 private val logger = KotlinLogging.logger {}
 
 class SocketObservable(val mConfig: SocketConfig, val mSocket: Socket, val mClient: SocketClient, val mOption: SocketOption?) : Observable<DataWrapper>() {
@@ -40,25 +34,26 @@ class SocketObservable(val mConfig: SocketConfig, val mSocket: Socket, val mClie
     val mReadThread: ReadThread = ReadThread()
     lateinit var observerWrapper: SocketObserver
     var mHeartBeatRef: Disposable? = null
-
+    var isClosed = false
     override fun subscribeActual(observer: Observer<in DataWrapper>?) {
         observerWrapper = SocketObserver(observer)
+        isClosed = false
         observer?.onSubscribe(observerWrapper)
         try {
-            Thread(Runnable {
-                try {
-                    mSocket.connect(InetSocketAddress(mConfig.mIp, mConfig.mPort
-                            ?: 1080), mConfig.mTimeout ?: 0)
-                    mClient.sendData(mOption?.mFirstContact, false)
+            //Thread(Runnable {
+            try {
+                mSocket.connect(InetSocketAddress(mConfig.mIp, mConfig.mPort
+                        ?: 1080), mConfig.mTimeout ?: 0)
+                mClient.sendData(mOption?.mFirstContact, false)
 
-                    observer?.onNext(DataWrapper(SocketState.OPEN, ByteArray(0), mOption?.mPreSharedKey))
-                    mReadThread.start()
-                } catch (e: Exception) {
-                    logger.error { "in->" + e.toString() }
-                    state = SocketState.CLOSE_WITH_ERROR
-                    close()
-                }
-            }).start()
+                observer?.onNext(DataWrapper(SocketState.OPEN, ByteArray(0), mOption?.mPreSharedKey))
+                mReadThread.start()
+            } catch (e: Exception) {
+                logger.error { "in->" + e.toString() }
+                state = SocketState.CLOSE_WITH_ERROR
+                close()
+            }
+            //  }).start()
         } catch (e: Exception) {
             logger.error { "out->" + e.toString() }
             state = SocketState.CLOSE_WITH_ERROR
@@ -71,9 +66,11 @@ class SocketObservable(val mConfig: SocketConfig, val mSocket: Socket, val mClie
     }
 
     fun close() {
-
-        observerWrapper.onNext(DataWrapper(state, ByteArray(0), mOption?.mPreSharedKey))
-        observerWrapper.dispose()
+        if (!isClosed) {
+            observerWrapper.onNext(DataWrapper(state, ByteArray(0), mOption?.mPreSharedKey))
+            observerWrapper.dispose()
+            isClosed = true
+        }
     }
 
     inner class SocketObserver(private val observer: Observer<in DataWrapper>?) : Disposable {
@@ -151,7 +148,6 @@ class SocketObservable(val mConfig: SocketConfig, val mSocket: Socket, val mClie
     private fun read(input: BufferedReader): ByteArray {
         if (!input.ready()) return ByteArray(0)
         mOption?.apply {
-
             when (hasHeadTail()) {
                 HeadTail.BOTH -> {
                     var next: Int

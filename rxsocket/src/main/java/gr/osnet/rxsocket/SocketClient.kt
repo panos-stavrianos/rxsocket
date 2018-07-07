@@ -11,11 +11,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/9
- * @description:
- */
 private val logger = KotlinLogging.logger {}
 
 class SocketClient(private val mConfig: SocketConfig) {
@@ -172,6 +167,11 @@ class SocketClient(private val mConfig: SocketConfig) {
     fun sendEnd() {
         logger.info { "To server: END" }
         sendData("END")
+    }
+
+    fun waitUntilEnd() {
+        while (!(mObservable as SocketObservable).isClosed)
+            Thread.sleep(100)
     }
 
 }

@@ -16,10 +16,4 @@
 
 package gr.osnet.rxsocket.meta
 
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/8
- * @description:
- */
-
 data class DataWrapper(val state: Int, val data: ByteArray, val pre_shared_key: String?)

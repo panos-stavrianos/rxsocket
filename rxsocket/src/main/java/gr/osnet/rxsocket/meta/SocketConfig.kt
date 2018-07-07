@@ -18,12 +18,6 @@ package gr.osnet.rxsocket.meta
 
 import java.nio.charset.Charset
 
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/8
- * @description:
- */
-
 class SocketConfig(
         val mIp: String?,
         val mPort: Int?,

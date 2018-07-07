@@ -16,12 +16,6 @@
 
 package gr.osnet.rxsocket.post
 
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/9
- * @description:
- */
-
 class PendingPost private constructor(
         var data: ByteArray?,
         var next: PendingPost?) {

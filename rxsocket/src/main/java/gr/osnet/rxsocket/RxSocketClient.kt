@@ -18,12 +18,6 @@ package gr.osnet.rxsocket
 
 import gr.osnet.rxsocket.meta.SocketConfig
 
-/**
- * @author: Est <codeest.dev@gmail.com>
- * @date: 2017/7/8
- * @description:
- */
-
 class RxSocketClient {
 
     companion object {
