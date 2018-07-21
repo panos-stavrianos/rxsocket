@@ -29,31 +29,31 @@ object AES {
 
     fun testingStuff() {
         logger.info { "testingStuff" }
-        /*      Thread {
-                  encrypt(Environment.getDataDirectory().absolutePath + "/TimePatrol/1.jpg", "1234")
+        Thread {
+            encrypt(Environment.getDataDirectory().absolutePath + "/TimePatrol/1.jpg", "1234")
 
-                  val file = File("${Environment.DIRECTORY_DCIM}/2.jpg")
-                  val size = file.length()
-                  val bytes = ByteArray(size.toInt())
-                  try {
-                      val buf = BufferedInputStream(FileInputStream(file))
-                      buf.read(bytes, 0, bytes.size)
-                      buf.close()
-                  } catch (e: FileNotFoundException) {
-                      // TODO Auto-generated catch block
-                      e.printStackTrace()
-                  } catch (e: IOException) {
-                      // TODO Auto-generated catch block
-                      e.printStackTrace()
-                  }
+            val file = File("${Environment.DIRECTORY_DCIM}/2.jpg")
+            val size = file.length()
+            val bytes = ByteArray(size.toInt())
+            try {
+                val buf = BufferedInputStream(FileInputStream(file))
+                buf.read(bytes, 0, bytes.size)
+                buf.close()
+            } catch (e: FileNotFoundException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            } catch (e: IOException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            }
 
-                  val dec = decrypt(bytes, "1234")
+            val dec = decrypt(bytes, "1234")
 
-                  val bos = BufferedOutputStream(FileOutputStream(Environment.getExternalStorageDirectory().absolutePath + "/A/3.jpg"))
-                  bos.write(dec)
-                  bos.flush()
-                  bos.close()
-              }.start()*/
+            val bos = BufferedOutputStream(FileOutputStream(Environment.getExternalStorageDirectory().absolutePath + "/A/3.jpg"))
+            bos.write(dec)
+            bos.flush()
+            bos.close()
+        }.start()
     }
 
 
@@ -114,7 +114,7 @@ object AES {
 
 
         val dest = random.nextInt(9999)
-        val fileOutputStream = FileOutputStream("${Environment.DIRECTORY_DCIM}/$dest")
+        val fileOutputStream = FileOutputStream("${Environment.getDataDirectory().absolutePath}/TimePatrol/$dest")
         fileOutputStream.write(ivSalt)
         fileOutputStream.flush()
 

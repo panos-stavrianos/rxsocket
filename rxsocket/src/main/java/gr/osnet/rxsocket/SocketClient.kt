@@ -158,7 +158,7 @@ class SocketClient(private val mConfig: SocketConfig) {
         else
             path
 
-        val file = File("${Environment.DIRECTORY_DCIM}/$dest")
+        val file = File("${Environment.getDataDirectory().absolutePath}/TimePatrol/$dest")
         val size = file.length()
         val bytes = ByteArray(size.toInt())
         try {
