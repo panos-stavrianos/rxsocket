@@ -1,6 +1,5 @@
 package gr.osnet.rxsocket
 
-import android.os.Environment
 import gr.osnet.rxsocket.meta.*
 import gr.osnet.rxsocket.post.AsyncPoster
 import gr.osnet.rxsocket.post.IPoster
@@ -158,7 +157,7 @@ class SocketClient(private val mConfig: SocketConfig) {
         else
             path
 
-        val file = File("${Environment.getExternalStorageDirectory().absolutePath}/TimePatrol/$dest")
+        val file = File(dest)
         val size = file.length()
         val bytes = ByteArray(size.toInt())
         try {

@@ -112,9 +112,7 @@ object AES {
         val c = Cipher.getInstance("AES/CBC/PKCS5Padding")
         c.init(Cipher.ENCRYPT_MODE, key, iv)
 
-
-        val dest = random.nextInt(9999)
-        val fileOutputStream = FileOutputStream("${Environment.getDataDirectory().absolutePath}/TimePatrol/$dest")
+        val fileOutputStream = FileOutputStream("$path.enc")
         fileOutputStream.write(ivSalt)
         fileOutputStream.flush()
 
@@ -123,7 +121,7 @@ object AES {
         ByteStreams.copy(isa, cos)
         isa.close()
         cos.close()
-        return dest.toString()
+        return "$path.enc"
     }
 
     fun encrypt(plaintext: ByteArray, password: String): ByteArray {
