@@ -163,14 +163,18 @@ class SocketClient(private val mConfig: SocketConfig) {
             val buf = BufferedInputStream(FileInputStream(file))
             val bufferSize = 3 * 1024 * 1024
             val result = ByteArray(bufferSize)
+            logger.error { "To server file size: ByteArray ->$size" }
 
             while (buf.available() > 0) {
-                val actualSize = if (buf.available() > bufferSize)
-                    bufferSize
-                else
+                val actualSize = if (buf.available() < bufferSize)
                     buf.available()
-                buf.read(result, 0, bufferSize)
-                mIPoster.enqueue(result.copyOfRange(0, actualSize - 1))
+                else
+                    bufferSize
+                buf.read(result, 0, actualSize)
+                val part = result.copyOf(actualSize)
+                logger.error { "To server part: ByteArray ->${part.size}" }
+
+                mIPoster.enqueue(part)
             }
 
         } catch (e: FileNotFoundException) {
@@ -181,10 +185,7 @@ class SocketClient(private val mConfig: SocketConfig) {
             e.printStackTrace()
         }
 
-
-
         logger.error { "To server : ByteArray ->" + size / 1000 + "kb" }
-
         lastExchange = System.currentTimeMillis()
     }
 

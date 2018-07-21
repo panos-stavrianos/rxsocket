@@ -1,6 +1,5 @@
 package gr.osnet.rxsocket
 
-import android.os.Environment
 import android.util.Base64
 import com.google.common.io.ByteStreams
 import mu.KotlinLogging
@@ -29,7 +28,7 @@ object AES {
 
     fun testingStuff() {
         logger.info { "testingStuff" }
-        Thread {
+        /*Thread {
             encrypt(Environment.getDataDirectory().absolutePath + "/TimePatrol/1.jpg", "1234")
 
             val file = File("${Environment.DIRECTORY_DCIM}/2.jpg")
@@ -53,7 +52,7 @@ object AES {
             bos.write(dec)
             bos.flush()
             bos.close()
-        }.start()
+        }.start()*/
     }
 
 
