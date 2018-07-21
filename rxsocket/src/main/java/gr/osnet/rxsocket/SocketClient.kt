@@ -159,11 +159,8 @@ class SocketClient(private val mConfig: SocketConfig) {
 
         val file = File(dest)
         val size = file.length()
-        val bytes = ByteArray(size.toInt())
         try {
             val buf = BufferedInputStream(FileInputStream(file))
-            buf.read(bytes, 0, bytes.size)
-            buf.close()
             val bufferSize = 3 * 1024 * 1024
             val result = ByteArray(bufferSize)
 
