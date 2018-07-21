@@ -1,15 +1,18 @@
 package gr.osnet.rxsocket
 
+import android.os.Environment
 import gr.osnet.rxsocket.meta.*
 import gr.osnet.rxsocket.post.AsyncPoster
 import gr.osnet.rxsocket.post.IPoster
 import gr.osnet.rxsocket.post.SyncPoster
 import io.reactivex.Observable
 import mu.KotlinLogging
+import java.io.*
 import java.net.Socket
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+
 
 private val logger = KotlinLogging.logger {}
 
@@ -142,6 +145,53 @@ class SocketClient(private val mConfig: SocketConfig) {
         lastExchange = System.currentTimeMillis()
     }
 
+    fun encrypt(path: String): String? {
+        return mOption?.mPreSharedKey?.let { AES.encrypt(path, it) }
+    }
+
+
+    fun sendBytes(path: String?, encrypted: Boolean = false) {
+        if (path == null)
+            return
+        val dest: String? = if (encrypted)
+            mOption?.mPreSharedKey?.let { AES.encrypt(path, it) }
+        else
+            path
+
+        val file = File("${Environment.DIRECTORY_DCIM}/$dest")
+        val size = file.length()
+        val bytes = ByteArray(size.toInt())
+        try {
+            val buf = BufferedInputStream(FileInputStream(file))
+            buf.read(bytes, 0, bytes.size)
+            buf.close()
+            val bufferSize = 3 * 1024 * 1024
+            val result = ByteArray(bufferSize)
+
+            while (buf.available() > 0) {
+                val actualSize = if (buf.available() > bufferSize)
+                    bufferSize
+                else
+                    buf.available()
+                buf.read(result, 0, bufferSize)
+                mIPoster.enqueue(result.copyOfRange(0, actualSize - 1))
+            }
+
+        } catch (e: FileNotFoundException) {
+            // TODO Auto-generated catch block
+            e.printStackTrace()
+        } catch (e: IOException) {
+            // TODO Auto-generated catch block
+            e.printStackTrace()
+        }
+
+
+
+        logger.error { "To server : ByteArray ->" + size / 1000 + "kb" }
+
+        lastExchange = System.currentTimeMillis()
+    }
+
     fun sendData(data: ByteArray?, encrypted: Boolean = false) {
         if (data == null)
             return
@@ -171,7 +221,7 @@ class SocketClient(private val mConfig: SocketConfig) {
 
     fun waitUntilEnd() {
         while (!(mObservable as SocketObservable).isClosed)
-            Thread.sleep(100)
+            Thread.sleep(400)
     }
 
 }

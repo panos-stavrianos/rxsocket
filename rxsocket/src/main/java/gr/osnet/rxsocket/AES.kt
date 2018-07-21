@@ -1,10 +1,10 @@
 package gr.osnet.rxsocket
 
+import android.os.Environment
 import android.util.Base64
+import com.google.common.io.ByteStreams
 import mu.KotlinLogging
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.UnsupportedEncodingException
+import java.io.*
 import java.nio.charset.Charset
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
@@ -30,8 +30,29 @@ object AES {
     fun testingStuff() {
         logger.info { "testingStuff" }
         Thread {
-            //testCompression(data);
-            //testEncryption(data)
+            encrypt(Environment.getDataDirectory().absolutePath + "/TimePatrol/1.jpg", "1234")
+
+            val file = File("${Environment.DIRECTORY_DCIM}/2.jpg")
+            val size = file.length()
+            val bytes = ByteArray(size.toInt())
+            try {
+                val buf = BufferedInputStream(FileInputStream(file))
+                buf.read(bytes, 0, bytes.size)
+                buf.close()
+            } catch (e: FileNotFoundException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            } catch (e: IOException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            }
+
+            val dec = decrypt(bytes, "1234")
+
+            val bos = BufferedOutputStream(FileOutputStream(Environment.getExternalStorageDirectory().absolutePath + "/A/3.jpg"))
+            bos.write(dec)
+            bos.flush()
+            bos.close()
         }.start()
     }
 
@@ -61,6 +82,48 @@ object AES {
         }
         logger.info { "=========" }
 
+    }
+
+    fun encrypt(path: String, password: String): String? {
+        if (password.isEmpty()) return null
+        val random = SecureRandom()
+        val salt = ByteArray(16)
+        random.nextBytes(salt)
+        val spec = PBEKeySpec(password.toCharArray(), salt, 100, 128) // AES-256
+        val f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+
+        val keyBytes = f.generateSecret(spec).encoded
+        val key = SecretKeySpec(keyBytes, "AES")
+        logger.info { "PASSWORD: $password" }
+
+        logger.info { "SALT: " + toBase64(salt) }
+        logger.info { "key: " + toBase64(key.encoded) }
+
+        val ivBytes = ByteArray(16)
+        random.nextBytes(ivBytes)
+
+        val iv = IvParameterSpec(ivBytes)
+
+        val ivSalt = ByteArray(32)
+        System.arraycopy(ivBytes, 0, ivSalt, 0, 16)
+        System.arraycopy(salt, 0, ivSalt, 16, 16)
+
+
+        val c = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        c.init(Cipher.ENCRYPT_MODE, key, iv)
+
+
+        val dest = random.nextInt(9999)
+        val fileOutputStream = FileOutputStream("${Environment.DIRECTORY_DCIM}/$dest")
+        fileOutputStream.write(ivSalt)
+        fileOutputStream.flush()
+
+        val cos = CipherOutputStream(fileOutputStream, c)
+        val isa: InputStream = FileInputStream(path) //Input stream
+        ByteStreams.copy(isa, cos)
+        isa.close()
+        cos.close()
+        return dest.toString()
     }
 
     fun encrypt(plaintext: ByteArray, password: String): ByteArray {
@@ -158,7 +221,6 @@ object AES {
     }
 
     fun compress(content: ByteArray): ByteArray {
-
         val bos = ByteArrayOutputStream()
         GZIPOutputStream(bos).bufferedWriter(UTF_8).use { it.write(String(content)) }
         return bos.toByteArray()
@@ -190,7 +252,6 @@ object AES {
 
     fun unpack(data: String, pre_shared_key: String?): String {
         if (pre_shared_key.isNullOrEmpty()) return ""
-
         val enc = fromBase64(data)
         val compressed = if (pre_shared_key != null)
             decrypt(enc, pre_shared_key)
