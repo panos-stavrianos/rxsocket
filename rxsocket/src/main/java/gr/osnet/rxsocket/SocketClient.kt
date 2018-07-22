@@ -166,13 +166,15 @@ class SocketClient(private val mConfig: SocketConfig) {
             logger.error { "To server file size: ByteArray ->$size" }
 
             while (buf.available() > 0) {
-                val actualSize = if (buf.available() < bufferSize)
-                    buf.available()
-                else
-                    bufferSize
-                buf.read(result, 0, actualSize)
+                val available = buf.available()
+                if (available < bufferSize) {
+                    buf.read(result, 0, available)
+                    mIPoster.enqueue(result.copyOf(available))
+                } else {
+                    buf.read(result, 0, bufferSize)
+                    mIPoster.enqueue(result)
+                }
 
-                mIPoster.enqueue(result.copyOf(actualSize))
             }
 
         } catch (e: FileNotFoundException) {
