@@ -25,6 +25,8 @@ private val logger = KotlinLogging.logger {}
 class AsyncPoster(private val mSocketClient: SocketClient, private val mExecutor: Executor) : Runnable, IPoster {
 
     private val queue: PendingPostQueue = PendingPostQueue()
+    @Volatile
+    override var executorRunning: Boolean = false
 
     override fun enqueue(data: ByteArray) {
         val pendingPost = PendingPost.obtainPendingPost(data)
