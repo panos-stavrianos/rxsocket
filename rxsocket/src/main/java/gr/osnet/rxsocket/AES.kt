@@ -108,7 +108,7 @@ object AES {
         System.arraycopy(salt, 0, ivSalt, 16, 16)
 
 
-        val c = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val c = Cipher.getInstance("AES/CBC/NoPadding")
         c.init(Cipher.ENCRYPT_MODE, key, iv)
 
         val fileOutputStream = FileOutputStream("$path.enc")
@@ -143,7 +143,7 @@ object AES {
 
         val iv = IvParameterSpec(ivBytes)
 
-        val c = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val c = Cipher.getInstance("AES/CBC/NoPadding")
         c.init(Cipher.ENCRYPT_MODE, key, iv)
         val encValue = c.doFinal(plaintext)
 
@@ -174,7 +174,7 @@ object AES {
             val keyBytes = f.generateSecret(spec).encoded
             val key = SecretKeySpec(keyBytes, "AES")
 
-            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+            val cipher = Cipher.getInstance("AES/CBC/NoPadding")
             val ivParams = IvParameterSpec(ivBytes)
             cipher.init(Cipher.DECRYPT_MODE, key, ivParams)
             return cipher.doFinal(cipherBytes)
