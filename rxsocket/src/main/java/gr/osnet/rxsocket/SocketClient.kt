@@ -161,7 +161,7 @@ class SocketClient(private val mConfig: SocketConfig) {
         val size = file.length()
         try {
             val buf = BufferedInputStream(FileInputStream(file))
-            val bufferSize = 3 * 1024 * 1024
+            val bufferSize = 15 * 1024 * 1024
             val result = ByteArray(bufferSize)
             logger.error { "To server file size: ByteArray ->$size" }
 
