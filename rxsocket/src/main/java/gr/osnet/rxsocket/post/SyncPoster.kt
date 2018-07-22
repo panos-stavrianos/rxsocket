@@ -27,7 +27,7 @@ class SyncPoster(private val mSocketClient: SocketClient, private val mExecutor:
     private val queue: PendingPostQueue = PendingPostQueue()
 
     @Volatile
-    private var executorRunning: Boolean = false
+    var executorRunning: Boolean = false
 
     override fun enqueue(data: ByteArray) {
         val pendingPost = PendingPost.obtainPendingPost(data)
@@ -58,6 +58,7 @@ class SyncPoster(private val mSocketClient: SocketClient, private val mExecutor:
                         mSocketClient.mSocket.getOutputStream()?.apply {
                             try {
                                 write(pendingPost!!.data)
+
                                 flush()
                             } catch (e: Exception) {
                                 mSocketClient.disconnectWithError()

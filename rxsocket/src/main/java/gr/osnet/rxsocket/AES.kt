@@ -150,8 +150,6 @@ object AES {
         System.arraycopy(salt, 0, finalCipherText, 16, 16)
         System.arraycopy(encValue, 0, finalCipherText, 32, encValue.size)
         return finalCipherText
-
-
     }
 
 

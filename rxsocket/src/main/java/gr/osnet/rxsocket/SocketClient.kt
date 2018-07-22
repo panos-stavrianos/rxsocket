@@ -169,9 +169,18 @@ class SocketClient(private val mConfig: SocketConfig) {
                 val available = buf.available()
                 if (available < bufferSize) {
                     buf.read(result, 0, available)
+
+                    while (mIPoster.executorRunning) {
+                        Thread.sleep(100)
+                    }
                     mIPoster.enqueue(result.copyOf(available))
+
                 } else {
+
                     buf.read(result, 0, bufferSize)
+                    while (mIPoster.executorRunning) {
+                        Thread.sleep(100)
+                    }
                     mIPoster.enqueue(result)
                 }
 
