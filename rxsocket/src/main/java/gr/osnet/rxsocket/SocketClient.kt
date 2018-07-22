@@ -171,10 +171,8 @@ class SocketClient(private val mConfig: SocketConfig) {
                 else
                     bufferSize
                 buf.read(result, 0, actualSize)
-                val part = result.copyOf(actualSize)
-                logger.error { "To server part: ByteArray ->${part.size}" }
 
-                mIPoster.enqueue(part)
+                mIPoster.enqueue(result.copyOf(actualSize))
             }
 
         } catch (e: FileNotFoundException) {
