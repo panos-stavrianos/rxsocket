@@ -93,26 +93,23 @@ object AES {
 
         val keyBytes = f.generateSecret(spec).encoded
         val key = SecretKeySpec(keyBytes, "AES")
-        logger.info { "PASSWORD: $password" }
-
-        logger.info { "SALT: " + toBase64(salt) }
-        logger.info { "key: " + toBase64(key.encoded) }
 
         val ivBytes = ByteArray(16)
         random.nextBytes(ivBytes)
 
         val iv = IvParameterSpec(ivBytes)
 
-        val ivSalt = ByteArray(32)
-        System.arraycopy(ivBytes, 0, ivSalt, 0, 16)
-        System.arraycopy(salt, 0, ivSalt, 16, 16)
-
+        logger.info { "PASSWORD: $password" }
+        logger.info { "key: " + toBase64(key.encoded) }
+        logger.info { "ivBytes: " + toBase64(ivBytes) }
+        logger.info { "SALT: " + toBase64(salt) }
 
         val c = Cipher.getInstance("AES/CBC/PKCS7Padding")
         c.init(Cipher.ENCRYPT_MODE, key, iv)
 
         val fileOutputStream = FileOutputStream("$path.enc")
-        fileOutputStream.write(ivSalt)
+        fileOutputStream.write(ivBytes)
+        fileOutputStream.write(salt)
         fileOutputStream.flush()
 
         val cos = CipherOutputStream(fileOutputStream, c)
@@ -156,6 +153,88 @@ object AES {
 
 
     }
+
+
+    fun decrypt(path: String, pre_shared_key: String): String {
+        if (pre_shared_key.isEmpty()) return ""
+
+        try {
+            val fis = FileInputStream(path)
+            val fos = FileOutputStream("$path.mp4")
+            logger.error { "fis ${fis.available()}" }
+
+
+            val ivBytes = ByteArray(16)
+            fis.read(ivBytes)
+            logger.error { "fis ${fis.available()}" }
+
+            val salt = ByteArray(16)
+            fis.read(salt)
+            logger.error { "fis ${fis.available()}" }
+
+            logger.info { "ivBytes: " + toBase64(ivBytes) }
+            logger.info { "SALT: " + toBase64(salt) }
+
+            val spec = PBEKeySpec(pre_shared_key.toCharArray(), salt, 100, 128) // AES-256
+            val f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+
+            val keyBytes = f.generateSecret(spec).encoded
+            val key = SecretKeySpec(keyBytes, "AES")
+
+            val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+            val ivParams = IvParameterSpec(ivBytes)
+            cipher.init(Cipher.DECRYPT_MODE, key, ivParams)
+            val cis = CipherInputStream(fis, cipher)
+            logger.error { "cis ${cis.available()}" }
+
+            logger.info { "key: " + toBase64(key.encoded) }
+
+
+            checkNotNull(cis)
+            checkNotNull(fos)
+            val buf = ByteArray(8192)
+            var total: Long = 0
+            try {
+
+
+                while (true) {
+                    val r = cis.read(buf)
+                    if (r == -1) {
+                        break
+                    }
+                    fos.write(buf, 0, r)
+                    total += r.toLong()
+
+                }
+            } catch (e: Exception) {
+                logger.error { "total $total" }
+
+            }
+            fos.flush()
+            fos.close()
+            cis.close()
+            return "$path.mp4"
+        } catch (e: NoSuchPaddingException) {
+            e.printStackTrace()
+        } catch (e: InvalidAlgorithmParameterException) {
+            e.printStackTrace()
+        } catch (e: InvalidKeyException) {
+            e.printStackTrace()
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+        } catch (e: BadPaddingException) {
+            e.printStackTrace()
+        } catch (e: IllegalBlockSizeException) {
+            e.printStackTrace()
+        } catch (e: InvalidKeySpecException) {
+            e.printStackTrace()
+        } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
+        }
+
+        return ""
+    }
+
 
     fun decrypt(data: ByteArray, pre_shared_key: String): ByteArray {
         if (pre_shared_key.isEmpty()) return ByteArray(0)
