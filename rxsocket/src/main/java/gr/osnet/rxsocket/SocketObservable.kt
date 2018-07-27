@@ -25,6 +25,7 @@ import java.io.BufferedReader
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.*
+import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
@@ -41,7 +42,6 @@ class SocketObservable(private val mConfig: SocketConfig, val mSocket: Socket, v
         observerWrapper?.let {
             observer?.onSubscribe(it)
             try {
-                //Thread(Runnable {
                 try {
                     mSocket.connect(InetSocketAddress(mConfig.mIp, mConfig.mPort
                             ?: 1080), mConfig.mTimeout ?: 0)
@@ -49,16 +49,13 @@ class SocketObservable(private val mConfig: SocketConfig, val mSocket: Socket, v
 
                     observer?.onNext(DataWrapper(SocketState.OPEN, ByteArray(0), mOption?.mPreSharedKey))
                     mReadThread.start()
-                } catch (e: Exception) {
-                    logger.error { "in->" + e.toString() }
+                } catch (throwable: Throwable) {
                     state = SocketState.CLOSE_WITH_ERROR
-                    close()
+                    close(throwable)
                 }
-                //  }).start()
-            } catch (e: Exception) {
-                logger.error { "out->" + e.toString() }
+            } catch (throwable: Throwable) {
                 state = SocketState.CLOSE_WITH_ERROR
-                close()
+                close(throwable)
             }
         }
 
@@ -68,9 +65,9 @@ class SocketObservable(private val mConfig: SocketConfig, val mSocket: Socket, v
         mHeartBeatRef = ref
     }
 
-    fun close() {
+    fun close(throwable: Throwable) {
         if (!isClosed) {
-            observerWrapper?.onNext(DataWrapper(state, ByteArray(0), mOption?.mPreSharedKey))
+            observerWrapper?.onNext(DataWrapper(state, ByteArray(0), mOption?.mPreSharedKey, throwable))
             observerWrapper?.dispose()
             isClosed = true
         }
@@ -179,7 +176,6 @@ class SocketObservable(private val mConfig: SocketConfig, val mSocket: Socket, v
 
         override fun run() {
             super.run()
-            logger.info { "ReadThread Start" }
             try {
                 var time = System.currentTimeMillis()
                 var sumTime: Long = 0
@@ -192,24 +188,21 @@ class SocketObservable(private val mConfig: SocketConfig, val mSocket: Socket, v
 
                     if (data.isNotEmpty()) {
                         val deltaTime = System.currentTimeMillis() - time
-                        sumTime += deltaTime
-                        counter++
-                        averageTime = sumTime / counter
-                        logger.info { deltaTime.toString() + " av: " + averageTime }
-
+                        if (deltaTime < 1000) {
+                            sumTime += deltaTime
+                            counter++
+                            averageTime = sumTime / counter
+                            logger.info { deltaTime.toString() + " av: " + averageTime }
+                        }
                         time = System.currentTimeMillis()
                         observerWrapper?.onNext(data)
                     }
-                    if (averageTime > 1000)
-                        averageTime = 1000
+                    averageTime = max(averageTime, 1000)
                     Thread.sleep(averageTime / 2)
                 }
-            } catch (e: Exception) {
-                logger.info { "ReadThread Close with Exception" }
-                logger.error { e.toString() }
-                close()
+            } catch (throwable: Throwable) {
+                close(throwable)
             }
-            logger.info { "ReadThread Close" }
         }
     }
 

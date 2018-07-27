@@ -58,18 +58,16 @@ class SyncPoster(private val mSocketClient: SocketClient, private val mExecutor:
                         mSocketClient.mSocket.getOutputStream()?.apply {
                             try {
                                 write(pendingPost!!.data)
-
                                 flush()
-                            } catch (e: Exception) {
-                                mSocketClient.disconnectWithError()
+                            } catch (throwable: Throwable) {
+                                mSocketClient.disconnectWithError(throwable)
                             }
                             PendingPost.releasePendingPost(pendingPost!!)
                         }
                     }
                 }
-            } catch (e: Exception) {
-                logger.error { e.toString() }
-                mSocketClient.disconnectWithError()
+            } catch (throwable: Throwable) {
+                mSocketClient.disconnectWithError(throwable)
             }
 
         } finally {

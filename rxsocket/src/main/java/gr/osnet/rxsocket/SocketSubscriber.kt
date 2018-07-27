@@ -33,19 +33,19 @@ abstract class SocketSubscriber : Consumer<DataWrapper> {
                 else
                     String(t.data, Charsets.UTF_8)
                 logger.info { "From server: $data" }
-                onResponse(data)
+                onResponse(data, t.timePassed)
             }
             SocketState.OPEN -> onConnected()
-            SocketState.CLOSE -> onDisconnected()
-            SocketState.CLOSE_WITH_ERROR -> onDisconnectedWithError()
+            SocketState.CLOSE -> onDisconnected(t.timePassed)
+            SocketState.CLOSE_WITH_ERROR -> onDisconnectedWithError(t.throwable, t.timePassed)
         }
     }
 
     abstract fun onConnected()
 
-    abstract fun onDisconnected()
+    abstract fun onDisconnected(timePassed: Long)
 
-    abstract fun onDisconnectedWithError()
+    abstract fun onDisconnectedWithError(throwable: Throwable, timePassed: Long)
 
-    abstract fun onResponse(data: String)
+    abstract fun onResponse(data: String, timePassed: Long)
 }

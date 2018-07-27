@@ -30,6 +30,7 @@ class SocketClient(private val mConfig: SocketConfig) {
 
 
     fun connect(): Observable<DataWrapper> {
+        connectedTime = System.currentTimeMillis()
         mObservable = SocketObservable(mConfig, mSocket, this, mOption)
         mIPoster = if (mConfig.mThreadStrategy == ThreadStrategy.ASYNC) AsyncPoster(this, mExecutor) else SyncPoster(this, mExecutor)
         initHeartBeat()
@@ -38,14 +39,14 @@ class SocketClient(private val mConfig: SocketConfig) {
 
     fun disconnect() {
         if (mObservable is SocketObservable) {
-            (mObservable as SocketObservable).close()
+            (mObservable as SocketObservable).close(Throwable(""))
         }
     }
 
-    fun disconnectWithError() {
+    fun disconnectWithError(throwable: Throwable) {
         if (mObservable is SocketObservable) {
             (mObservable as SocketObservable).state = SocketState.CLOSE_WITH_ERROR
-            (mObservable as SocketObservable).close()
+            (mObservable as SocketObservable).close(throwable)
         }
     }
 
@@ -169,18 +170,9 @@ class SocketClient(private val mConfig: SocketConfig) {
                 val available = buf.available()
                 if (available < bufferSize) {
                     buf.read(result, 0, available)
-
-                    while (mIPoster.executorRunning) {
-                        Thread.sleep(100)
-                    }
                     mIPoster.enqueue(result.copyOf(available))
-
                 } else {
-
                     buf.read(result, 0, bufferSize)
-                    while (mIPoster.executorRunning) {
-                        Thread.sleep(100)
-                    }
                     mIPoster.enqueue(result)
                 }
 
@@ -228,6 +220,10 @@ class SocketClient(private val mConfig: SocketConfig) {
     fun waitUntilEnd() {
         while (!(mObservable as SocketObservable).isClosed)
             Thread.sleep(400)
+    }
+
+    companion object {
+        var connectedTime: Long = System.currentTimeMillis()
     }
 
 }

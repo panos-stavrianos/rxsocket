@@ -19,5 +19,4 @@ package gr.osnet.rxsocket.post
 interface IPoster {
     fun enqueue(data: ByteArray)
     var executorRunning: Boolean
-
 }

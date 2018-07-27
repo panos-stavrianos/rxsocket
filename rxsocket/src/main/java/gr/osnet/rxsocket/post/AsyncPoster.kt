@@ -42,9 +42,8 @@ class AsyncPoster(private val mSocketClient: SocketClient, private val mExecutor
                 flush()
                 PendingPost.releasePendingPost(pendingPost)
             }
-        } catch (e: Exception) {
-            mSocketClient.disconnectWithError()
-            logger.error { e.toString() }
+        } catch (throwable: Throwable) {
+            mSocketClient.disconnectWithError(throwable)
         }
     }
 

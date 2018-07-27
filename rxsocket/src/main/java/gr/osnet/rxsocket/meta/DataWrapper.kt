@@ -16,4 +16,8 @@
 
 package gr.osnet.rxsocket.meta
 
-data class DataWrapper(val state: Int, val data: ByteArray, val pre_shared_key: String?)
+import gr.osnet.rxsocket.SocketClient
+
+data class DataWrapper(val state: Int, val data: ByteArray, val pre_shared_key: String?, val throwable: Throwable = Throwable("Unknown Error")) {
+    val timePassed: Long = System.currentTimeMillis() - SocketClient.connectedTime
+}
