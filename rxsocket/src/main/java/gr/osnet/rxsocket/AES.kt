@@ -159,16 +159,16 @@ object AES {
         try {
             val fis = FileInputStream(path)
             val fos = FileOutputStream("$path.mp4")
-            logger.error { "fis ${fis.available()}" }
+            logger.info { "fis ${fis.available()}" }
 
 
             val ivBytes = ByteArray(16)
             fis.read(ivBytes)
-            logger.error { "fis ${fis.available()}" }
+            logger.info { "fis ${fis.available()}" }
 
             val salt = ByteArray(16)
             fis.read(salt)
-            logger.error { "fis ${fis.available()}" }
+            logger.info { "fis ${fis.available()}" }
 
             logger.info { "ivBytes: " + toBase64(ivBytes) }
             logger.info { "SALT: " + toBase64(salt) }
@@ -183,7 +183,7 @@ object AES {
             val ivParams = IvParameterSpec(ivBytes)
             cipher.init(Cipher.DECRYPT_MODE, key, ivParams)
             val cis = CipherInputStream(fis, cipher)
-            logger.error { "cis ${cis.available()}" }
+            logger.info { "cis ${cis.available()}" }
 
             logger.info { "key: " + toBase64(key.encoded) }
 
@@ -205,7 +205,7 @@ object AES {
 
                 }
             } catch (e: Exception) {
-                logger.error { "total $total" }
+                logger.info { "total $total" }
 
             }
             fos.flush()

@@ -140,7 +140,7 @@ class SocketClient(private val mConfig: SocketConfig) {
             data
 
         mIPoster.enqueue(result)
-        logger.error { "To server : ByteArray ->" + result.size / 1000 + "kb" }
+        logger.info { "To server : ByteArray ->" + result.size / 1000 + "kb" }
 
         lastExchange = System.currentTimeMillis()
     }
@@ -164,29 +164,33 @@ class SocketClient(private val mConfig: SocketConfig) {
             val buf = BufferedInputStream(FileInputStream(file))
             val bufferSize = 15 * 1024 * 1024
             val result = ByteArray(bufferSize)
-            logger.error { "To server file size: ByteArray ->$size" }
-
+            logger.info { "To server file size: ByteArray ->$size" }
             while (buf.available() > 0) {
+                logger.info { "=======" }
                 val available = buf.available()
-                if (available < bufferSize) {
+                val toSend = if (available < bufferSize) {
                     buf.read(result, 0, available)
-                    mIPoster.enqueue(result.copyOf(available))
+                    result.copyOf(available)
                 } else {
                     buf.read(result, 0, bufferSize)
-                    mIPoster.enqueue(result)
+                    result.copyOf(bufferSize)
                 }
-
+                mSocket.getOutputStream()?.apply {
+                    try {
+                        write(toSend)
+                        flush()
+                    } catch (throwable: Throwable) {
+                        disconnectWithError(throwable)
+                    }
+                }
             }
-
         } catch (e: FileNotFoundException) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         } catch (e: IOException) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         }
 
-        logger.error { "To server : ByteArray ->" + size / 1000 + "kb" }
+        logger.info { "To server : ByteArray ->" + size / 1000 + "kb" }
         lastExchange = System.currentTimeMillis()
     }
 

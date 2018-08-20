@@ -84,7 +84,7 @@ class SocketObservable(private val mConfig: SocketConfig, val mSocket: Socket, v
                             return@onNext
                         }
                         if (Arrays.equals(message, mOption.mWrong)) {
-                            logger.error { "Server send NAK" }
+                            logger.info { "Server send NAK" }
                             state = SocketState.CLOSE_WITH_ERROR
                             dispose()
                             return@onNext
@@ -94,7 +94,7 @@ class SocketObservable(private val mConfig: SocketConfig, val mSocket: Socket, v
                 if (message.isEmpty()) {
                     mOption?.apply {
                         if (mOption.mOk != null && mOption.mWrong != null) {
-                            logger.error { "Server send wrong CRC: " + String(data) }
+                            logger.info { "Server send wrong CRC: " + String(data) }
                             mClient.sendData(mOption.mWrong, false)
                             mClient.sendEnd()
                             state = SocketState.CLOSE_WITH_ERROR
